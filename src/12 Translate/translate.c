@@ -6,6 +6,10 @@
 
 /* -------------------------------------------------------------------------- */
 
+#define BUF_SIZE 1024;
+
+c* -------------------------------------------------------------------------- */
+
 char transChar (char src, char s1 [], char s2 [])
 {
 	int i;
@@ -58,8 +62,10 @@ int main (int argc, char* argv[])
 	char* set1 = argv [1];
 	char* set2 = argv [2];
 	
-	char source [1024];
-	char target [1024];
+    // Buffers
+    
+	char source [BUF_SIZE];
+	char target [BUF_SIZE];
 	
 	while (scanf ("%s", source) != EOF ) 
 	{ 
