@@ -47,13 +47,13 @@ int main (int argc, char* argv[])
 {
     if (argc != 3)
     {
-		fprintf (stderr, "USAGE: %s <source> <target>\n", argv [0]);
+		fprintf (stderr, "USAGE: %s <set1> <set2>\n", argv [0]);
 		exit (1); 
 	}
 	
 	if (strlen (argv [1]) != strlen (argv [2]))
 	{
-		fprintf (stderr, "ERROR: <source> and <target> must be the same length\n");
+		fprintf (stderr, "ERROR: <set1> and <set2> must be the same length\n");
 		exit (1); 
 	}
 	
@@ -67,7 +67,7 @@ int main (int argc, char* argv[])
 	char source [BUF_SIZE];
 	char target [BUF_SIZE];
 	
-	while (scanf ("%s", source) != EOF ) 
+	while (scanf ("%s", source) != EOF) 
 	{ 
         transString (source, target, set1, set2);
         
