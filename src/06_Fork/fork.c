@@ -1,6 +1,8 @@
 /* -------------------------------------------------------------------------- */
 
 #include <stdio.h>
+#include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -12,7 +14,7 @@ int main (int argc, char* argv[])
     
     if ((pid = fork ()) < 0)
     {
-		fprintf (stderr, "Fork failed\n");
+		fprintf (stderr, "ERROR: Fork failed (%s)\n", strerror (errno));
 		return 1;
 	}
     
