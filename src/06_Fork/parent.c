@@ -15,13 +15,13 @@ int main (int argc, char* argv[])
     
     if (argc <= 1)
     {
-		fprintf (stderr, "%s <child program> <child args ...>\n", argv [0]);
+		fprintf (stderr, "USAGE: %s <child program> <child args ...>\n", argv [0]);
 		return -1;
 	}
 	
     if ((pid = fork ()) < 0)
     {
-		fprintf (stderr, "Fork failed\n");
+		fprintf (stderr, "ERROR: Fork failed (%s)\n", strerror (errno));
 		return 1;
 	}
     
@@ -38,7 +38,7 @@ int main (int argc, char* argv[])
 		
 		if (execvp (argv [1], argv + 2) < 0)
 		{
-			fprintf (stderr, "Could not execute \"%s\" (%s)\n", argv [1], strerror (errno));
+			fprintf (stderr, "ERROR: Could not execute \"%s\" (%s)\n", argv [1], strerror (errno));
 			return -1;
 		}
 	}
