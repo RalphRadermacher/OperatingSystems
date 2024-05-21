@@ -2,8 +2,12 @@
 #
 #
 *.o
+# Known executables
 a.out
 child
 parent
 pipe
 fork
+client
+server
+
