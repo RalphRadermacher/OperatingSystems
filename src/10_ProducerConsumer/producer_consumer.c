@@ -47,7 +47,7 @@ int getSynchronized ()
 
     sem_post (&mutex);
     sem_post (&full);
-    
+
     return bufElem;
 }
 
