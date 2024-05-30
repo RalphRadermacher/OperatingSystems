@@ -5,10 +5,11 @@
 # Known executables
 a.out
 child
+client
+fork
 parent
 pipe
-fork
-client
+producer_consumer
 server
 shmread
 shmwrite
