@@ -53,7 +53,7 @@ int main (int argc, char *argv[])
 
     printf ("Process %d: Written to shared memory: \"%s\"\n", getpid (), msg);
 
-	return 0;
+    return 0;
 }
 
 /* -------------------------------------------------------------------------- */
