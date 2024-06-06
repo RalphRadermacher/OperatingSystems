@@ -1,0 +1,11 @@
+
+cd ~/Dokumente/OperatingSystems/src/07_PipeNamed
+
+cat /etc/services | grep http
+
+mkfifo mypipe
+
+grep http < mypipe
+cat /etc/services > mypipe
+
+                  

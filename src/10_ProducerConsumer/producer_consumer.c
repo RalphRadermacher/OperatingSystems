@@ -114,7 +114,7 @@ int main (int argc, char *argv[])
     pthread_t pids      [PRODUCERS];
     pthread_t cids      [CONSUMERS];
     
-    int       i;
+    int i;
     
     for (i = 0; i < PRODUCERS; i++)
     {

@@ -15,6 +15,12 @@ int  *readPos;
 
 /* -------------------------------------------------------------------------- */
 
+sem_t mutex;
+sem_t empty;
+sem_t full;
+
+/* -------------------------------------------------------------------------- */
+
 int shm_buffer_init (int resetBuf)
 {
     int shmFd;
@@ -42,6 +48,12 @@ int shm_buffer_init (int resetBuf)
         return -3;
     }
 
+    // Create semaphores
+ 
+    sem_init (&mutex, 0, 1);
+    sem_init (&empty, 0, 0);
+    sem_init (&full,  0, SHM_BUFFER_SIZE);
+
     // Set the pointers
     
     shmAddrInt = (int *) shmAddr;
@@ -50,6 +62,13 @@ int shm_buffer_init (int resetBuf)
     writePos = shmAddrInt + SHM_BUFFER_SIZE;
     readPos  = shmAddrInt + SHM_BUFFER_SIZE + 1;
     
+    // Create semaphores
+ 
+    sem_init (&mutex, 0, 1);
+    sem_init (&empty, 0, 0);
+    sem_init (&full,  0, SHM_BUFFER_SIZE);
+
+   
     if (resetBuf)
     {
         for (int i = 0; i < SHM_BUFFER_SIZE; i++)
@@ -78,10 +97,35 @@ void shm_buffer_print ()
 
 /* -------------------------------------------------------------------------- */
 
-void shm_buffer_put (int bufElem)
+void shm_buffer_put_local (int bufElem)
 {
     buffer [*writePos] = bufElem;
     *writePos = (*writePos + 1) % SHM_BUFFER_SIZE;
+}
+
+/* -------------------------------------------------------------------------- */
+
+int shm_buffer_get_local ()
+{
+    int bufElem;
+    
+    bufElem = buffer [*readPos];
+    *readPos = (*readPos + 1) % SHM_BUFFER_SIZE;
+
+    return bufElem;
+}
+
+/* -------------------------------------------------------------------------- */
+
+void shm_buffer_put (int bufElem)
+{
+    sem_wait (&full);
+    sem_wait (&mutex);
+    
+    shm_buffer_put_local (bufElem);
+
+    sem_post (&mutex);
+    sem_post (&empty);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -90,8 +134,13 @@ int shm_buffer_get ()
 {
     int bufElem;
     
-    bufElem = buffer [*readPos];
-    *readPos = (*readPos + 1) % SHM_BUFFER_SIZE;
+    sem_wait (&empty);
+    sem_wait (&mutex);
+    
+    bufElem = shm_buffer_get_local ();
+
+    sem_post (&mutex);
+    sem_post (&full);
 
     return bufElem;
 }

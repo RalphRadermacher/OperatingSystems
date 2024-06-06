@@ -30,17 +30,19 @@ int main (int argc, char *argv[])
 
     // Map shared memory
     
-	if ((addr = mmap (NULL, SHM_SIZE, PROT_READ, MAP_SHARED, shmfd, 0)) == MAP_FAILED)
-	{
+    if ((addr = mmap (NULL, SHM_SIZE, PROT_READ, MAP_SHARED, shmfd, 0)) == MAP_FAILED)
+    {
         fprintf (stderr, "ERROR: Shared memory mapping failed (%s)\n", strerror (errno));
         return 1;
-	}
+    }
 
-	// Read message from shared memory
+    // Read message from shared memory
     
-	memcpy (msg, addr, sizeof (msg));
+    memcpy (msg, addr, sizeof (msg));
 
-	printf ( "Process %d: Read from shared memory: \"%s\"\n", getpid(), msg);
+    printf ( "Process %d: Read from shared memory: \"%s\"\n", getpid(), msg);
 
-	return 0;
+    return 0;
 }
+
+/* -------------------------------------------------------------------------- */
