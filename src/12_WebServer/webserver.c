@@ -27,13 +27,12 @@ int main (int argc, char *argv[])
     int                connFd     = 0;
     struct sockaddr_in servAddr; 
 
-    char               sendBuf [1025];
-    time_t             ticks; 
-
+    int                nBytes = 0;
+    char               recvBuf [1024];
+     
     listenFd = socket (AF_INET, SOCK_STREAM, 0);
     
     memset (&servAddr, '0', sizeof (servAddr));
-    memset (sendBuf,   '0', sizeof (sendBuf)); 
 
     servAddr.sin_family      = AF_INET;
     servAddr.sin_addr.s_addr = htonl (INADDR_ANY);
@@ -47,12 +46,14 @@ int main (int argc, char *argv[])
     {
         connFd = accept (listenFd, (struct sockaddr*) NULL, NULL); 
 
-        ticks = time (NULL);
-        snprintf (sendBuf, sizeof (sendBuf), "%.24s", ctime (&ticks));
-        
-        printf ("Connection accepted at %s\n", sendBuf);
+        printf ("Connection accepted\n");
 
-        write (connFd, sendBuf, strlen (sendBuf)); 
+        while ((nBytes = read (connFd, recvBuf, sizeof (recvBuf) - 1)) > 0)
+        {
+            recvBuf [nBytes] = 0;
+        
+            printf ("Message: %s\n", recvBuf);
+        } 
 
         close (connFd);
         sleep (1);

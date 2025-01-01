@@ -4,24 +4,9 @@
  * Vorlesung Betriebssysteme an der DHBW Karlsruhe und Mannheim
  * 
  * Dozent: Dr. Ralph Radermacher
- * 
- * Aufgabe - Translate
- * 
- * Schreiben Sie ein C-Programm translate.c, das Zeichenketten aus der 
- * Standeingabe einliest und nach einer Übersetzung in der 
- * Standardausgabe wieder ausgibt. Die Übersetzung wird durch zwei 
- * gleichlange Argumente der Kommandozeile set1 und set2 definiert 
- * und geschieht wie folgt, für der jeden Buchstaben der eingelesenen 
- * Zeichenketten wird in nachdem ersten Auftreten des Buchstabens
- * in dem Argumente set1 gesucht. Falls der Buchstabe nicht im 
- * Argument set1 gefunden wird, bleibt der Buchstabe unverändert. 
- * Falls der Buchstabe im Argument set1 an der i-ten Stelle zum 
- * ersten Mal auftritt, wird der Buchstabe durch den Buchstabe 
- * an der i-ten Stelle des Arguments set2 ersetzt.
- * 
  */
  
-* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 #include <stdio.h>
 #include <stdlib.h>

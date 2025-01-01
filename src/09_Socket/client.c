@@ -1,5 +1,13 @@
 /* -------------------------------------------------------------------------- */
 
+/*
+ * Vorlesung Betriebssysteme an der DHBW Karlsruhe und Mannheim
+ * 
+ * Dozent: Dr. Ralph Radermacher
+ */
+
+/* -------------------------------------------------------------------------- */
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -37,7 +45,7 @@ int main (int argc, char *argv[])
     memset (&servAddr, '0', sizeof (servAddr)); 
 
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port  = htons (5000); 
+    servAddr.sin_port   = htons (5000); 
 
     if (inet_pton (AF_INET, argv [1], &servAddr.sin_addr) <= 0)
     {
