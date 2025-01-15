@@ -21,10 +21,21 @@
 
 /* -------------------------------------------------------------------------- */
 
+#define WORKERS 5
+
+/* -------------------------------------------------------------------------- */
+
+void *worker (int *pnr)
+{
+    pthread_exit (0);
+}
+
+/* -------------------------------------------------------------------------- */
+
 int main (int argc, char *argv[])
 {
-    int                listenFd   = 0; 
-    int                connFd     = 0;
+    int                listenFd = 0; 
+    int                connFd   = 0;
     struct sockaddr_in servAddr; 
 
     int                nBytes = 0;
