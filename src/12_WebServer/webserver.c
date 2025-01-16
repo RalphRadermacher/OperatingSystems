@@ -19,17 +19,19 @@
 #include <sys/types.h>
 #include <time.h> 
 
+#include "logging.h"
+
 /* -------------------------------------------------------------------------- */
 
 #define WORKERS 5
 
 /* -------------------------------------------------------------------------- */
 
+/*
 void *worker (int *pnr)
 {
-    pthread_exit (0);
 }
-
+*/
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char *argv[])
@@ -52,18 +54,20 @@ int main (int argc, char *argv[])
     bind (listenFd, (struct sockaddr*) &servAddr, sizeof (servAddr)); 
 
     listen (listenFd, 10); 
+    
+        logE ("Connection accepted on port %d\n", nBytes);
 
     while (1)
     {
         connFd = accept (listenFd, (struct sockaddr*) NULL, NULL); 
 
-        printf ("Connection accepted\n");
+        logging (1, "Connection accepted on port %d\n", 5000);
 
         while ((nBytes = read (connFd, recvBuf, sizeof (recvBuf) - 1)) > 0)
         {
             recvBuf [nBytes] = 0;
         
-            printf ("Message: %s\n", recvBuf);
+            logging (1, "Message: %s\n", recvBuf);
         } 
 
         close (connFd);
