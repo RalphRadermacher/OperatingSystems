@@ -18,20 +18,66 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h> 
+#include <pthread.h>
 
+#include "buffer.h"
 #include "logging.h"
 
 /* -------------------------------------------------------------------------- */
 
-#define WORKERS 5
+#define BUF_SIZE 5 
+#define WORKERS  5
+
+pthread_t wids [WORKERS];
+int       workers [WORKERS];
+ 
+/* -------------------------------------------------------------------------- */
+
+void *worker (int *wnr)
+{
+    int   connFd;
+    int   nBytes = 0;
+    char  recvBuf [1024];
+     
+    logI ("Worker %d started\n", *wnr);
+    
+    while (1)
+    {
+        connFd = bufferGet ();
+        
+        if ((nBytes = read (connFd, recvBuf, sizeof (recvBuf) - 1)) > 0)
+        {
+            recvBuf [nBytes] = 0;
+        
+            logI ("Worker %d : %s\n", *wnr, recvBuf);
+        } 
+
+        close (connFd);
+    }
+}
 
 /* -------------------------------------------------------------------------- */
 
-/*
-void *worker (int *pnr)
+int initialize ()
 {
+    int i;
+    
+    bufferInit (BUF_SIZE);
+    
+    for (i = 0; i < WORKERS; i++)
+    {
+        workers [i] = i;
+    }
+    
+    for (i = 0; i < WORKERS; i++)
+    {
+        logI ("create (%d)\n", workers [i]);
+        pthread_create (&wids [i], NULL, (void*) worker, (void*) &workers [i]);
+    }
+    
+    return 0;
 }
-*/
+
 /* -------------------------------------------------------------------------- */
 
 int main (int argc, char *argv[])
@@ -40,9 +86,8 @@ int main (int argc, char *argv[])
     int                connFd   = 0;
     struct sockaddr_in servAddr; 
 
-    int                nBytes = 0;
-    char               recvBuf [1024];
-     
+    initialize ();
+    
     listenFd = socket (AF_INET, SOCK_STREAM, 0);
     
     memset (&servAddr, '0', sizeof (servAddr));
@@ -55,23 +100,13 @@ int main (int argc, char *argv[])
 
     listen (listenFd, 10); 
     
-        logE ("Connection accepted on port %d\n", nBytes);
-
     while (1)
     {
         connFd = accept (listenFd, (struct sockaddr*) NULL, NULL); 
-
-        logging (1, "Connection accepted on port %d\n", 5000);
-
-        while ((nBytes = read (connFd, recvBuf, sizeof (recvBuf) - 1)) > 0)
-        {
-            recvBuf [nBytes] = 0;
         
-            logging (1, "Message: %s\n", recvBuf);
-        } 
-
-        close (connFd);
-        sleep (1);
+        logI ("Connection accepted on port %d\n", 5000);
+        
+        bufferPut (connFd);
      }
 }
 

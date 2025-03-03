@@ -11,6 +11,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "logging.h"
+
 /* -------------------------------------------------------------------------- */
 
 int logLevel = INFO;
