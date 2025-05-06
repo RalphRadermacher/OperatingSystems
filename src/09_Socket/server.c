@@ -1,5 +1,13 @@
 /* -------------------------------------------------------------------------- */
 
+/*
+ * Vorlesung Betriebssysteme an der DHBW Karlsruhe und Mannheim
+ * 
+ * Dozent: Dr. Ralph Radermacher
+ */
+
+/* -------------------------------------------------------------------------- */
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

@@ -8,20 +8,29 @@
 
 /* -------------------------------------------------------------------------- */
 
+#include <stdarg.h>
 #include <stdio.h>
 
+#include "logging.h"
+
 /* -------------------------------------------------------------------------- */
- 
-int main (int argc, char* argv[])
+
+int logLevel = INFO;
+
+/* -------------------------------------------------------------------------- */
+  
+void logging (int level, const char *format, ...)
 {
-    int i;
-    
-    for (i = 0; i < argc; i++)
+    if (level > logLevel)
     {
-        printf ("argv [%d] = %s\n", i, argv [i]);
+        return;
     }
-
-    return 0;
+    
+    va_list args;
+    
+    va_start (args, format);
+    vprintf (format, args);
+    va_end (args);
 }
-
+    
 /* -------------------------------------------------------------------------- */

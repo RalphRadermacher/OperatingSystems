@@ -8,20 +8,17 @@
 
 /* -------------------------------------------------------------------------- */
 
-#include <stdio.h>
+#define ERROR  0
+#define INFO   1
+#define FINER  2
+
+void logging (int level, const char *format, ...);
 
 /* -------------------------------------------------------------------------- */
- 
-int main (int argc, char* argv[])
-{
-    int i;
-    
-    for (i = 0; i < argc; i++)
-    {
-        printf ("argv [%d] = %s\n", i, argv [i]);
-    }
 
-    return 0;
-}
+#define logE(format, ...) logging (ERROR, format, __VA_ARGS__)
+#define logI(format, ...) logging (INFO,  format, __VA_ARGS__)
+#define logF(format, ...) logging (FINER, format, __VA_ARGS__)
 
 /* -------------------------------------------------------------------------- */
+
