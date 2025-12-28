@@ -1,9 +1,21 @@
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Vorlesung Betriebssysteme an der DHBW Karlsruhe und Mannheim
+ *
+ * Dozent: Dr. Ralph Radermacher
+ */
+
+/* -------------------------------------------------------------------------- */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_LINE 1024
 #define MAX_CPUS 256
+
+/* -------------------------------------------------------------------------- */
 
 void print_header ()
 {
@@ -27,6 +39,8 @@ void print_box_line (const char *label, const char *value)
     printf ("│ %-20s : %-38s │\n", label, value);
 }
 
+/* -------------------------------------------------------------------------- */
+
 int main ()
 {
     FILE *fp;
@@ -37,8 +51,8 @@ int main ()
     int line_num = 0;
 
     // Öffne /proc/interrupts
-    fp = fopen ("/proc/interrupts", "r");
-    if (fp == NULL)
+
+    if ((fp = fopen ("/proc/interrupts", "r")) == NULL)
     {
         perror ("Fehler beim Öffnen von /proc/interrupts");
         return 1;
@@ -131,3 +145,7 @@ int main ()
 
     return 0;
 }
+
+/* -------------------------------------------------------------------------- */
+
+
