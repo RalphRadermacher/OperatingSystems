@@ -61,9 +61,13 @@ int main ()
     print_header ();
 
     // Lese erste Zeile (CPU-Header)
+    //
+    //             CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7
+
     if (fgets (line, sizeof(line), fp))
     {
         char *token = strtok (line, " \t\n");
+
         while (token != NULL && num_cpus < MAX_CPUS)
         {
             if (strncmp (token, "CPU", 3) == 0)
@@ -83,12 +87,15 @@ int main ()
     printf ("├────────┼──────────────┼──────────────────────────────────────────┤\n");
 
     // Lese Interrupt-Zeilen
+    //
+    // LOC:     283437     281906     264200     249929     211548     377578     231131     246507   Local timer interrupts
+
     while (fgets (line, sizeof(line), fp))
     {
         line_num++;
 
         // Parse die Zeile
-        char *ptr = line;
+        char *ptr   = line;
         char *colon = strchr (line, ':');
 
         if (colon == NULL)
