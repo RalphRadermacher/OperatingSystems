@@ -27,16 +27,25 @@ int main (int argc, char *argv[])
     int                nBytes = 0;
     char               recvBuf [1024];
     struct sockaddr_in servAddr; 
+    short              port;
 
-    if (argc != 2)
+    if (argc != 3)
     {
-        fprintf (stderr, "USAGE: %s <ip of server> \n", argv[0]);
+        fprintf (stderr, "USAGE: %s <ip of server> <port>\n", argv [0]);
         return 1;
     } 
 
-    memset (recvBuf, '0', sizeof(recvBuf ));
+    if ((port = atoi (argv [2])) == 0)
+    {
+        fprintf (stderr, "ERROR: Invalid port number (%s)\n", strerror (errno));
+        return 1;
+    }
+
+    memset (recvBuf, '0', sizeof (recvBuf ));
     
-    if ((sockFd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    // Create a socket
+
+    if ((sockFd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
         fprintf (stderr, "ERROR: Could not create socket (%s)\n", strerror (errno));
         return 1;
@@ -45,15 +54,17 @@ int main (int argc, char *argv[])
     memset (&servAddr, '0', sizeof (servAddr)); 
 
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port   = htons (5000); 
+    servAddr.sin_port   = htons (port);
 
     if (inet_pton (AF_INET, argv [1], &servAddr.sin_addr) <= 0)
     {
-        fprintf (stderr, "ERROR: inet_pton error occured (%s)\n", strerror (errno));
+        fprintf (stderr, "ERROR: inet_pton error occurred (%s)\n", strerror (errno));
         return 1;
     } 
 
-    if (connect(sockFd, (struct sockaddr *) &servAddr, sizeof (servAddr)) < 0)
+    // Connect to server
+
+    if (connect (sockFd, (struct sockaddr *) &servAddr, sizeof (servAddr)) < 0)
     {
        fprintf (stderr, "ERROR: Connect failed (%s)\n", strerror (errno));
        return 1;
