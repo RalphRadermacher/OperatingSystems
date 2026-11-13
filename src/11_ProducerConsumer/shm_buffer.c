@@ -4,20 +4,25 @@
 
 /* -------------------------------------------------------------------------- */
 
-void *shmAddr;
-int  shmSize;
+void          *shmAddr;
+int           shmSize;
 
-int  *shmAddrInt;
-int  *buffer;
+int           *shmAddrInt;
 
-int  *writePos;
-int  *readPos;
+struct sems_t *sems;
+int           *buffer;
+
+int           *writePos;
+int           *readPos;
 
 /* -------------------------------------------------------------------------- */
 
-sem_t mutex;
-sem_t empty;
-sem_t full;
+struct sems_t
+{
+    sem_t mutex;
+    sem_t empty;
+    sem_t full;
+};
 
 /* -------------------------------------------------------------------------- */
 
@@ -34,7 +39,7 @@ int shm_buffer_init (int resetBuf)
 
     // Adjust shared memory size
     
-    shmSize = (SHM_BUFFER_SIZE + 2) * sizeof (int);
+    shmSize = sizeof (struct sems_t) + (SHM_BUFFER_SIZE + 2) * sizeof (int);
     
     if (ftruncate (shmFd, shmSize) < 0)
     {
@@ -48,25 +53,21 @@ int shm_buffer_init (int resetBuf)
         return -3;
     }
 
-    // Create semaphores
- 
-    sem_init (&mutex, 0, 1);
-    sem_init (&empty, 0, 0);
-    sem_init (&full,  0, SHM_BUFFER_SIZE);
-
     // Set the pointers
     
-    shmAddrInt = (int *) shmAddr;
+    sems       = (struct sems_t*) shmAddr;
+
+    shmAddrInt = (int *) (shmAddr + sizeof (struct sems_t));
     
-    buffer   = shmAddrInt;
-    writePos = shmAddrInt + SHM_BUFFER_SIZE;
-    readPos  = shmAddrInt + SHM_BUFFER_SIZE + 1;
+    buffer     = shmAddrInt;
+    writePos   = shmAddrInt + SHM_BUFFER_SIZE;
+    readPos    = shmAddrInt + SHM_BUFFER_SIZE + 1;
     
     // Create semaphores
  
-    sem_init (&mutex, 0, 1);
-    sem_init (&empty, 0, 0);
-    sem_init (&full,  0, SHM_BUFFER_SIZE);
+    sem_init (&sems -> mutex, 1, 1);
+    sem_init (&sems -> empty, 1, 0);
+    sem_init (&sems -> full,  1, SHM_BUFFER_SIZE);
 
    
     if (resetBuf)
@@ -87,6 +88,8 @@ int shm_buffer_init (int resetBuf)
 
 void shm_buffer_print ()
 {
+    printf ("Buffer: ");
+
     for (int i = 0; i < SHM_BUFFER_SIZE + 2; i++)
     {
         printf (" %4d", buffer [i]);
@@ -119,13 +122,13 @@ int shm_buffer_get_local ()
 
 void shm_buffer_put (int bufElem)
 {
-    sem_wait (&full);
-    sem_wait (&mutex);
+    sem_wait (&sems -> full);
+    sem_wait (&sems -> mutex);
     
     shm_buffer_put_local (bufElem);
 
-    sem_post (&mutex);
-    sem_post (&empty);
+    sem_post (&sems -> mutex);
+    sem_post (&sems -> empty);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -134,13 +137,13 @@ int shm_buffer_get ()
 {
     int bufElem;
     
-    sem_wait (&empty);
-    sem_wait (&mutex);
+    sem_wait (&sems -> empty);
+    sem_wait (&sems -> mutex);
     
     bufElem = shm_buffer_get_local ();
 
-    sem_post (&mutex);
-    sem_post (&full);
+    sem_post (&sems -> mutex);
+    sem_post (&sems -> full);
 
     return bufElem;
 }

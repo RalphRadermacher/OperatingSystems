@@ -32,10 +32,13 @@ int main (int argc, char *argv[])
     
     for (int i = 0; i < items; i++)
     {
+        printf ("producer [%d].shm_buffer_put ()\n", getpid ());
+        shm_buffer_print ();
         item = produce ();
-        printf ("producer [%d].shm_buffer_put (%d)\n", getpid (), item);
         shm_buffer_put (item);
-    }
+        printf ("producer [%d].shm_buffer_put (%d)\n", getpid (), item);
+        shm_buffer_print ();
+   }
 }
 
 /* -------------------------------------------------------------------------- */
