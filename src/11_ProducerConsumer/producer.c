@@ -1,5 +1,7 @@
 /* -------------------------------------------------------------------------- */
 
+#include <stdlib.h>
+
 #include "shm_buffer.h"
 
 /* -------------------------------------------------------------------------- */
@@ -21,7 +23,7 @@ int main (int argc, char *argv[])
     
     if (shm_buffer_init (0) < 0)
     {
-        fprintf (stderr, "ERROR: SHM buffer initialisation failed (%s)\n", strerror (errno));
+        fprintf (stderr, "ERROR: SHM buffer initialization failed (%s)\n", strerror (errno));
         return 1;
     }
     
@@ -31,7 +33,7 @@ int main (int argc, char *argv[])
     for (int i = 0; i < items; i++)
     {
         item = produce ();
-        printf ("producer [%d].shm_buffer_put (%d)\n", *pnr, item);
+        printf ("producer [%d].shm_buffer_put (%d)\n", getpid (), item);
         shm_buffer_put (item);
     }
 }
