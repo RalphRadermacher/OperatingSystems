@@ -15,7 +15,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-int  shm_buffer_init  (int resetBuf);
+int  shm_buffer_init  ();
 void shm_buffer_put   (int bufElem);
 int  shm_buffer_get   ();
 void shm_buffer_print ();

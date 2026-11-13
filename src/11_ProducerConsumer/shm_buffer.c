@@ -4,6 +4,15 @@
 
 /* -------------------------------------------------------------------------- */
 
+struct sems_t
+{
+    sem_t mutex;
+    sem_t empty;
+    sem_t full;
+};
+
+/* -------------------------------------------------------------------------- */
+
 void          *shmAddr;
 int           shmSize;
 
@@ -17,70 +26,80 @@ int           *readPos;
 
 /* -------------------------------------------------------------------------- */
 
-struct sems_t
-{
-    sem_t mutex;
-    sem_t empty;
-    sem_t full;
-};
-
-/* -------------------------------------------------------------------------- */
-
-int shm_buffer_init (int resetBuf)
+int shm_buffer_init ()
 {
     int shmFd;
-    
-     // Open shared memory
-    
-    if ((shmFd = shm_open (SHM_BUFFER_NAME, O_CREAT | O_RDWR, 0666)) < 0)
+    int created = 0;
+
+    // Shared memory size
+
+    shmSize = sizeof (struct sems_t) + (SHM_BUFFER_SIZE + 2) * sizeof (int);
+
+    // Open shared memory
+
+    if ((shmFd = shm_open (SHM_BUFFER_NAME, O_CREAT | O_EXCL | O_RDWR, 0600)) >= 0)
     {
+        // Shared memory segment was newly created
+
+        created = 1;
+
+        if (ftruncate (shmFd, shmSize) < 0)
+        {
+            perror ("ftruncate");
+            return -2;
+        }
+    }
+    else if (errno == EEXIST)
+    {
+        if ((shmFd = shm_open (SHM_BUFFER_NAME, O_RDWR, 0600)) < 0)
+        {
+            perror ("shm_open (open)");
+            return -3;
+        }
+    }
+    else
+    {
+        perror ("shm_open");
         return -1;
     }
 
-    // Adjust shared memory size
-    
-    shmSize = sizeof (struct sems_t) + (SHM_BUFFER_SIZE + 2) * sizeof (int);
-    
-    if (ftruncate (shmFd, shmSize) < 0)
-    {
-        return -2;
-    }
-
     // Map shared memory
-    
-    if ((shmAddr = mmap (NULL, shmSize, PROT_WRITE, MAP_SHARED, shmFd, 0)) == MAP_FAILED)
+
+    if ((shmAddr = mmap (NULL, shmSize, PROT_WRITE, MAP_SHARED, shmFd, 0))== MAP_FAILED)
     {
-        return -3;
+        perror ("mmap");
+        return -4;
     }
 
     // Set the pointers
-    
-    sems       = (struct sems_t*) shmAddr;
 
-    shmAddrInt = (int *) (shmAddr + sizeof (struct sems_t));
-    
-    buffer     = shmAddrInt;
-    writePos   = shmAddrInt + SHM_BUFFER_SIZE;
-    readPos    = shmAddrInt + SHM_BUFFER_SIZE + 1;
-    
-    // Create semaphores
- 
-    sem_init (&sems -> mutex, 1, 1);
-    sem_init (&sems -> empty, 1, 0);
-    sem_init (&sems -> full,  1, SHM_BUFFER_SIZE);
+    sems = (struct sems_t*) shmAddr;
 
-   
-    if (resetBuf)
+    shmAddrInt = (int*) (shmAddr + sizeof(struct sems_t));
+
+    buffer = shmAddrInt;
+    writePos = shmAddrInt + SHM_BUFFER_SIZE;
+    readPos = shmAddrInt + SHM_BUFFER_SIZE + 1;
+
+    if (created)
     {
+        // Create semaphores
+
+        sem_init (&(sems->mutex), 1, 1);
+        sem_init (&(sems->empty), 1, 0);
+        sem_init (&(sems->full),  1, SHM_BUFFER_SIZE);
+
+        // Initialize the buffer
+
         for (int i = 0; i < SHM_BUFFER_SIZE; i++)
         {
-            buffer [i] = -1;
+            buffer[i] = -1;
         }
-        
+
         *writePos = 0;
-        *readPos  = 0;
+        *readPos = 0;
     }
-    
+
     return 0;
 }
 

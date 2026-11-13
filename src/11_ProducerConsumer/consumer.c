@@ -25,11 +25,11 @@ int main (int argc, char *argv[])
     
     for (int i = 0; i < items; i++)
     {
-        printf ("consumer [%d].shm_buffer_get ()\n", getpid ());
-        shm_buffer_print ();
+        // printf ("consumer [%d].shm_buffer_get ()\n", getpid ());
+        // shm_buffer_print ();
         item = shm_buffer_get ();
         printf ("consumer [%d].shm_buffer_get () = %d\n", getpid (), item);
-        shm_buffer_print ();
+        // shm_buffer_print ();
     }
 }
 
