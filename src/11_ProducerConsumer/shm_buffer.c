@@ -4,82 +4,102 @@
 
 /* -------------------------------------------------------------------------- */
 
-void *shmAddr;
-int  shmSize;
-
-int  *shmAddrInt;
-int  *buffer;
-
-int  *writePos;
-int  *readPos;
+struct sems_t
+{
+    sem_t mutex;
+    sem_t empty;
+    sem_t full;
+};
 
 /* -------------------------------------------------------------------------- */
 
-sem_t mutex;
-sem_t empty;
-sem_t full;
+void          *shmAddr;
+int           shmSize;
+
+int           *shmAddrInt;
+
+struct sems_t *sems;
+int           *buffer;
+
+int           *writePos;
+int           *readPos;
 
 /* -------------------------------------------------------------------------- */
 
-int shm_buffer_init (int resetBuf)
+int shm_buffer_init ()
 {
     int shmFd;
-    
-     // Open shared memory
-    
-    if ((shmFd = shm_open (SHM_BUFFER_NAME, O_CREAT | O_RDWR, 0666)) < 0)
+    int created = 0;
+
+    // Shared memory size
+
+    shmSize = sizeof (struct sems_t) + (SHM_BUFFER_SIZE + 2) * sizeof (int);
+
+    // Open shared memory
+
+    if ((shmFd = shm_open (SHM_BUFFER_NAME, O_CREAT | O_EXCL | O_RDWR, 0600)) >= 0)
     {
+        // Shared memory segment was newly created
+
+        created = 1;
+
+        if (ftruncate (shmFd, shmSize) < 0)
+        {
+            perror ("ftruncate");
+            return -2;
+        }
+    }
+    else if (errno == EEXIST)
+    {
+        if ((shmFd = shm_open (SHM_BUFFER_NAME, O_RDWR, 0600)) < 0)
+        {
+            perror ("shm_open (open)");
+            return -3;
+        }
+    }
+    else
+    {
+        perror ("shm_open");
         return -1;
     }
 
-    // Adjust shared memory size
-    
-    shmSize = (SHM_BUFFER_SIZE + 2) * sizeof (int);
-    
-    if (ftruncate (shmFd, shmSize) < 0)
-    {
-        return -2;
-    }
-
     // Map shared memory
-    
-    if ((shmAddr = mmap (NULL, shmSize, PROT_WRITE, MAP_SHARED, shmFd, 0)) == MAP_FAILED)
-    {
-        return -3;
-    }
 
-    // Create semaphores
- 
-    sem_init (&mutex, 0, 1);
-    sem_init (&empty, 0, 0);
-    sem_init (&full,  0, SHM_BUFFER_SIZE);
+    if ((shmAddr = mmap (NULL, shmSize, PROT_WRITE, MAP_SHARED, shmFd, 0))== MAP_FAILED)
+    {
+        perror ("mmap");
+        return -4;
+    }
 
     // Set the pointers
-    
-    shmAddrInt = (int *) shmAddr;
-    
-    buffer   = shmAddrInt;
-    writePos = shmAddrInt + SHM_BUFFER_SIZE;
-    readPos  = shmAddrInt + SHM_BUFFER_SIZE + 1;
-    
-    // Create semaphores
- 
-    sem_init (&mutex, 0, 1);
-    sem_init (&empty, 0, 0);
-    sem_init (&full,  0, SHM_BUFFER_SIZE);
 
-   
-    if (resetBuf)
+    sems = (struct sems_t*) shmAddr;
+
+    shmAddrInt = (int*) (shmAddr + sizeof(struct sems_t));
+
+    buffer = shmAddrInt;
+    writePos = shmAddrInt + SHM_BUFFER_SIZE;
+    readPos = shmAddrInt + SHM_BUFFER_SIZE + 1;
+
+    if (created)
     {
+        // Create semaphores
+
+        sem_init (&(sems->mutex), 1, 1);
+        sem_init (&(sems->empty), 1, 0);
+        sem_init (&(sems->full),  1, SHM_BUFFER_SIZE);
+
+        // Initialize the buffer
+
         for (int i = 0; i < SHM_BUFFER_SIZE; i++)
         {
-            buffer [i] = -1;
+            buffer[i] = -1;
         }
-        
+
         *writePos = 0;
-        *readPos  = 0;
+        *readPos = 0;
     }
-    
+
     return 0;
 }
 
@@ -87,6 +107,8 @@ int shm_buffer_init (int resetBuf)
 
 void shm_buffer_print ()
 {
+    printf ("Buffer: ");
+
     for (int i = 0; i < SHM_BUFFER_SIZE + 2; i++)
     {
         printf (" %4d", buffer [i]);
@@ -119,13 +141,13 @@ int shm_buffer_get_local ()
 
 void shm_buffer_put (int bufElem)
 {
-    sem_wait (&full);
-    sem_wait (&mutex);
+    sem_wait (&sems -> full);
+    sem_wait (&sems -> mutex);
     
     shm_buffer_put_local (bufElem);
 
-    sem_post (&mutex);
-    sem_post (&empty);
+    sem_post (&sems -> mutex);
+    sem_post (&sems -> empty);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -134,13 +156,13 @@ int shm_buffer_get ()
 {
     int bufElem;
     
-    sem_wait (&empty);
-    sem_wait (&mutex);
+    sem_wait (&sems -> empty);
+    sem_wait (&sems -> mutex);
     
     bufElem = shm_buffer_get_local ();
 
-    sem_post (&mutex);
-    sem_post (&full);
+    sem_post (&sems -> mutex);
+    sem_post (&sems -> full);
 
     return bufElem;
 }

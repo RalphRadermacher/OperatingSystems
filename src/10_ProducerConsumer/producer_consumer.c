@@ -134,9 +134,13 @@ int main (int argc, char *argv[])
         consumers [i] = i;
     }
     
+    // Create the semaphores
+
     sem_init (&mutex, 0, 1);
     sem_init (&empty, 0, 0);
     sem_init (&full,  0, BUF_SIZE);
+
+    // Create the consumers and producers
 
     for (i = 0; i < CONSUMERS; i++)
     {
@@ -148,6 +152,8 @@ int main (int argc, char *argv[])
         pthread_create (&pids [i], NULL, (void*) producer, (void*) &producers [i]);
     }
     
+    // Wait for the consumers and producers to be finished
+
     for (i = 0; i < PRODUCERS; i++)
     {
         pthread_join (pids [i], NULL);
@@ -158,6 +164,8 @@ int main (int argc, char *argv[])
         pthread_join (cids [i], NULL);
     }
         
+    // Destroy the semaphores
+
     sem_destroy (&full);
     sem_destroy (&empty);
     sem_destroy (&full);

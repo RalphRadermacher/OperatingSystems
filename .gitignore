@@ -4,6 +4,7 @@
 *.o
 # Known executables
 a.out
+args
 child
 client
 fork

@@ -19,9 +19,9 @@
 
 void print_header ()
 {
-    printf ("╔════════════════════════════════════════════════════════════════╗\n");
-    printf ("║           Linux Interrupt-Statistiken Monitor                  ║\n");
-    printf ("╚════════════════════════════════════════════════════════════════╝\n\n");
+    printf ("╔══════════════════════════════════════════════════════════════════╗\n");
+    printf ("║             Linux Interrupt-Statistiken Monitor                  ║\n");
+    printf ("╚══════════════════════════════════════════════════════════════════╝\n\n");
 }
 
 void print_separator (int width)
@@ -43,12 +43,12 @@ void print_box_line (const char *label, const char *value)
 
 int main ()
 {
-    FILE *fp;
-    char line[MAX_LINE];
-    char irq[32], type[128], desc[256];
+    FILE      *fp;
+    char      line[MAX_LINE];
+    char      irq[32], type[128];
     long long counts[MAX_CPUS];
-    int num_cpus = 0;
-    int line_num = 0;
+    int       num_cpus = 0;
+    int       line_num = 0;
 
     // Öffne /proc/interrupts
 
@@ -78,9 +78,9 @@ int main ()
         }
     }
 
-    printf ("┌────────────────────────────────────────────────────────────────┐\n");
-    printf ("│ System-Info: %d CPU-Kern(e) erkannt                            │\n", num_cpus);
-    printf ("└────────────────────────────────────────────────────────────────┘\n\n");
+    printf ("┌──────────────────────────────────────────────────────────────────┐\n");
+    printf ("│ System-Info: %2d CPU-Kern(e) erkannt                              │\n", num_cpus);
+    printf ("└──────────────────────────────────────────────────────────────────┘\n\n");
 
     printf ("┌────────┬──────────────┬──────────────────────────────────────────┐\n");
     printf ("│  IRQ   │   Anzahl     │  Beschreibung                            │\n");
